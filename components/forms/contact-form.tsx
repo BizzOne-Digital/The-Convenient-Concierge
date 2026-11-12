@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useState, type FormEvent } from 'react'
+import Link from 'next/link'
 import { ArrowRight, CircleCheck, LoaderCircle } from 'lucide-react'
 import { contactSchema, fieldErrors } from '@/lib/validations'
 import { buttonClass } from '@/components/ui/button'
@@ -57,7 +58,14 @@ export function ContactForm() {
       <Field id="message" label="How can we help?" error={err('message')} className="sm:col-span-2">
         <textarea {...describe('message', e)} rows={6} className={`${inputClass} resize-y py-3.5`} />
       </Field>
-      <div className="sm:col-span-2">
+      <div className="flex flex-col gap-4 sm:col-span-2 sm:flex-row-reverse sm:items-center sm:justify-between">
+        <p className="max-w-sm text-[0.8125rem] leading-relaxed text-muted">
+          See our{' '}
+          <Link href="/privacy-policy" className="underline underline-offset-2 hover:text-red">
+            Privacy Policy
+          </Link>{' '}
+          for how we handle your information.
+        </p>
         <button type="submit" disabled={state.status === 'submitting'} className={buttonClass('primary', 'w-full sm:w-auto')}>
           {state.status === 'submitting' ? (
             <>

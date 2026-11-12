@@ -63,4 +63,3 @@ Client photos are from the existing website. Toronto skyline, aerial, Etobicoke 
 - Show "Marc Williams" as the named contact / click-and-collect pickup person? (Kept off the public site until confirmed.)
 - Facebook/Instagram URLs were taken from the current site. Confirm they are still active.
 - Real photos of the team and vehicle (current client photos are 1024px stock images), plus approved testimonials.
-- A privacy policy page for the booking and contact forms.

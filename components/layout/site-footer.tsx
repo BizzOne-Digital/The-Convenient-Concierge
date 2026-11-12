@@ -89,7 +89,12 @@ export function SiteFooter({ phone, email }: { phone: string; email: string }) {
         </div>
 
         <div className="flex flex-col gap-3 border-t border-white/10 py-7 text-sm text-white/45 sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} The Convenient Concierge. All rights reserved.</p>
+          <p>
+            © {new Date().getFullYear()} The Convenient Concierge. All rights reserved. ·{' '}
+            <Link href="/privacy-policy" className="transition-colors hover:text-white">
+              Privacy Policy
+            </Link>
+          </p>
           <p>Deliveries · Moving · Tasks &amp; Errands</p>
         </div>
       </div>

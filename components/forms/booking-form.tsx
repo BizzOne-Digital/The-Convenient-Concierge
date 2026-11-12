@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useState, type FormEvent } from 'react'
+import Link from 'next/link'
 import { ArrowRight, CircleCheck, Download, FileUp, ImagePlus, LoaderCircle, Phone } from 'lucide-react'
 import { business, services, type ServiceType } from '@/lib/content'
 import { MAX_PHOTOS, bookingSchema, fieldErrors, packingOptions } from '@/lib/validations'
@@ -325,7 +326,11 @@ export function BookingForm({ variant = 'full', defaultService }: { variant?: 'f
 
       <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <p id="booking-note" className="max-w-sm text-[0.8125rem] leading-relaxed text-muted">
-          This sends a booking request, not a confirmed appointment. We will contact you to confirm details and provide a quote.
+          This sends a booking request, not a confirmed appointment. We will contact you to confirm details and provide a quote. See our{' '}
+          <Link href="/privacy-policy" className="underline underline-offset-2 hover:text-red">
+            Privacy Policy
+          </Link>{' '}
+          for how we handle your information.
         </p>
         <button type="submit" disabled={state.status === 'submitting'} className={buttonClass('primary', 'w-full shrink-0 sm:w-auto')}>
           {state.status === 'submitting' ? (

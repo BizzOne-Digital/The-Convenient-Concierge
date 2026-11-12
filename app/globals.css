@@ -336,6 +336,7 @@ details.faq[open]::details-content {
   color: var(--color-text);
 }
 .prose-tcc > * + * { margin-top: 1.4em; }
+.prose-tcc > :first-child { margin-top: 0; }
 .prose-tcc h2 {
   font-family: var(--font-serif);
   font-size: clamp(1.9rem, 1.6rem + 1vw, 2.5rem);

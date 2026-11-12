@@ -51,6 +51,14 @@ test('old WordPress URLs redirect permanently to their new pages; unmapped ones 
     expect((await request.get(gone)).status(), gone).toBe(404)
 })
 
+test('privacy policy is linked from the footer and forms', async ({ page }) => {
+  await page.goto('/contact')
+  await expect(page.locator('form').getByRole('link', { name: 'Privacy Policy' })).toHaveAttribute('href', '/privacy-policy')
+  await page.getByRole('contentinfo').getByRole('link', { name: 'Privacy Policy' }).click()
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Privacy Policy')
+  await expect(page.getByText('Privacy Contact: Marc Williams')).toBeVisible()
+})
+
 test('admin login page is reachable and not indexable', async ({ page }) => {
   const res = await page.goto('/admin/login')
   expect(res?.headers()['x-robots-tag']).toContain('noindex')
