@@ -47,7 +47,7 @@ describe('business content integrity', () => {
     expect(organisations).toHaveLength(27)
     expect(new Set(organisations).size).toBe(27)
     expect(serviceAreas).toHaveLength(11)
-    expect(serviceAreas).toContain('East Mississauga')
+    expect(serviceAreas).toContain('Mississauga')
   })
 
   it('never publishes prices', () => {

@@ -35,6 +35,7 @@ export function pageMetadata({
 
 const areaServed = [
   { '@type': 'City', name: 'Toronto, ON' },
+  { '@type': 'AdministrativeArea', name: 'Greater Toronto Area, ON' },
   ...serviceAreas.filter((n) => n !== 'Downtown Toronto').map((name) => ({ '@type': 'Place', name: `${name}, ON` })),
 ]
 

@@ -46,7 +46,7 @@ export function Hero({ image, phone }: { image: string; phone: string }) {
           </div>
           <p className="rise mt-12 flex items-center gap-3 text-sm text-white/55" style={{ ['--d' as string]: 500 }}>
             <span className="h-px w-8 bg-white/30" />
-            Residential &amp; corporate clients in Toronto, Etobicoke &amp; East Mississauga
+            Residential &amp; corporate clients in Toronto, Etobicoke, Mississauga &amp; the GTA
           </p>
         </div>
 

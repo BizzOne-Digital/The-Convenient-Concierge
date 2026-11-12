@@ -12,7 +12,7 @@ export const metadata = {
   ...pageMetadata({
     title: 'Toronto Moving Services, Furniture Delivery & Everyday Concierge Help',
     description:
-      'Toronto moving services, furniture pickup and delivery, and personal concierge help with tasks and errands in Toronto, Etobicoke and East Mississauga.',
+      'Toronto moving services, furniture pickup and delivery, and personal concierge help with tasks and errands in Toronto, Etobicoke, Mississauga and the GTA.',
     path: '/',
   }),
   title: { absolute: 'Toronto Moving, Furniture Delivery & Errands | The Convenient Concierge' },

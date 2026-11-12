@@ -11,7 +11,7 @@ import { pageMetadata } from '@/lib/seo'
 export const metadata = pageMetadata({
   title: 'Contact Our Toronto Moving and Concierge Team',
   description:
-    'Call 647-457-5252 or email info@theconvenientconcierge.ca for quotes and questions about moving, delivery and errands in Toronto, Etobicoke and East Mississauga.',
+    'Call 647-457-5252 or email info@theconvenientconcierge.ca for quotes on moving, delivery and errands in Toronto, Etobicoke, Mississauga and the GTA.',
   path: '/contact',
 })
 

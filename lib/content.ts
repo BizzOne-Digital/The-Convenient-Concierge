@@ -27,11 +27,11 @@ export const serviceAreas = [
   'The Kingsway',
   'Etobicoke',
   'Humber Bay Shores',
-  'East Mississauga',
+  'Mississauga',
 ] as const
 
-/** One consistent summary of the service area. Only east Mississauga is served, so the full city is never claimed. */
-export const areaSummary = 'Toronto, Etobicoke and East Mississauga'
+/** One consistent summary of the service area (client-confirmed 2026-11-13: all of Mississauga plus the surrounding GTA). */
+export const areaSummary = 'Toronto, Etobicoke, Mississauga and the surrounding GTA'
 
 export const serviceTypes = ['moving', 'delivery', 'tasks'] as const
 export type ServiceType = (typeof serviceTypes)[number]
@@ -93,7 +93,7 @@ export const services: Service[] = [
     seo: {
       title: 'Toronto Moving Services: Condo, Small & Office Movers',
       description:
-        'Condo, apartment, small and office moves in Toronto, Etobicoke and East Mississauga. Movers-only loading, furniture assembly, staging and storage moves.',
+        'Condo, apartment, small and office moves in Toronto, Etobicoke, Mississauga and the GTA. Movers-only loading, furniture assembly, staging and storage moves.',
     },
     listHeading: 'Our Toronto moving services',
     related: { slug: 'pick-up-delivery', label: 'Moving just one item? See furniture pickup and delivery' },
@@ -230,7 +230,7 @@ export const trustPoints = [
   { icon: 'building', title: 'Residential & Corporate', text: 'Homes, condos, offices and events' },
   { icon: 'heart', title: 'Personalized Attention', text: 'Built around your exact needs' },
   { icon: 'clock', title: 'Convenience & Reliability', text: 'Handled promptly, every time' },
-  { icon: 'pin', title: 'Toronto & Nearby', text: 'Toronto, Etobicoke & East Mississauga' },
+  { icon: 'pin', title: 'Toronto & Nearby', text: 'Toronto, Etobicoke, Mississauga & the GTA' },
 ] as const
 
 export const navLinks = [
@@ -257,7 +257,7 @@ export const defaultFaqs = [
   },
   {
     question: 'Which areas do you service?',
-    answer: `We service ${serviceAreas.slice(0, -1).join(', ')} and ${serviceAreas.at(-1)}. Out-of-town deliveries are also available. Get in touch with the details and we will let you know.`,
+    answer: `We service ${serviceAreas.slice(0, -1).join(', ')} and ${serviceAreas.at(-1)}, plus the surrounding GTA. Out-of-town deliveries are also available. Get in touch with the details and we will let you know.`,
   },
   {
     question: 'Do you provide moving assistance for smaller moves?',

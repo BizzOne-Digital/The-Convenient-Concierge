@@ -106,7 +106,7 @@ export default async function AboutPage() {
               Toronto&rsquo;s west end, <span className="em-red">and beyond.</span>
             </h2>
             <p className="mt-6 max-w-md text-white/65">
-              Our Toronto and Etobicoke moving services, deliveries and errands cover the neighbourhoods below, through to East Mississauga.
+              Our Toronto and Etobicoke moving services, deliveries and errands cover the neighbourhoods below, Mississauga and the surrounding GTA.
               Out-of-town deliveries are available on request. Not sure if you&rsquo;re covered? Just ask.
             </p>
             <ButtonLink href="/contact" variant="outline-light" className="mt-8">

@@ -13,7 +13,7 @@ import { pageMetadata } from '@/lib/seo'
 export const metadata = pageMetadata({
   title: 'Moving, Delivery and Errand Services in Toronto',
   description:
-    'Condo, small and office moves, furniture pickup and delivery, and tasks and errands for homes and businesses in Toronto, Etobicoke and East Mississauga.',
+    'Condo, small and office moves, furniture pickup and delivery, and tasks and errands for homes and businesses in Toronto, Etobicoke, Mississauga and the GTA.',
   path: '/services',
 })
 
