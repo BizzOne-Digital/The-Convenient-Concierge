@@ -7,6 +7,7 @@ import { AdminForm, ConfirmButton, SubmitButton, adminInput } from '@/components
 import { deleteBookingAction, setBookingStatusAction } from '@/app/admin/actions'
 import { connectDB } from '@/lib/mongodb'
 import { serviceByType } from '@/lib/content'
+import { inquiryFieldLabels } from '@/lib/inquiries'
 import { BookingInquiry, bookingStatuses } from '@/models'
 
 export const metadata = { title: 'Booking request' }
@@ -18,13 +19,16 @@ export default async function BookingDetail({ params }: { params: Promise<{ id: 
   const b = await BookingInquiry.findById(id).lean()
   if (!b) notFound()
 
+  const l = inquiryFieldLabels(b.serviceType)
   const rows: [string, string | undefined | null][] = [
     ['Service', serviceByType(b.serviceType)?.name ?? 'General enquiry'],
     ['Preferred date', b.preferredDate ? new Date(b.preferredDate).toLocaleDateString('en-CA', { dateStyle: 'full' }) : null],
-    [b.serviceType === 'moving' ? 'Moving from' : b.serviceType === 'tasks' ? 'Location' : 'Pickup location', b.pickupAddress],
-    [b.serviceType === 'moving' ? 'Moving to' : 'Delivery location', b.destinationAddress],
+    [l.pickupAddress, b.pickupAddress],
+    [l.destinationAddress, b.destinationAddress],
     ['Property type', b.propertyType],
-    ['Item details', b.itemDetails],
+    ['Stairs / elevator', b.accessDetails],
+    ['Packing', b.packing],
+    [l.itemDetails, b.itemDetails],
   ]
   const setStatus = setBookingStatusAction.bind(null, id)
   const remove = deleteBookingAction.bind(null, id)
@@ -59,6 +63,15 @@ export default async function BookingDetail({ params }: { params: Promise<{ id: 
             <a href={b.attachmentUrl} className="mt-6 inline-flex items-center gap-2 rounded-lg border border-[#e3dad3] px-4 py-2.5 text-sm font-semibold hover:bg-cream">
               <Download aria-hidden className="size-4" /> Download attachment (moving checklist)
             </a>
+          )}
+          {b.photoUrls?.length > 0 && (
+            <div className="mt-6 flex flex-wrap gap-3">
+              {b.photoUrls.map((url: string, i: number) => (
+                <a key={url} href={url} className="inline-flex items-center gap-2 rounded-lg border border-[#e3dad3] px-4 py-2.5 text-sm font-semibold hover:bg-cream">
+                  <Download aria-hidden className="size-4" /> Photo {i + 1}
+                </a>
+              ))}
+            </div>
           )}
         </Panel>
 

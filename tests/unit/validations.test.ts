@@ -28,12 +28,31 @@ describe('booking validation', () => {
     expect(r.data?.email).toBe('jane@example.com')
   })
 
-  it('requires addresses for full moving requests', () => {
-    const r = bookingSchema.safeParse({ ...base, form: 'full', serviceType: 'moving' })
+  it('requires the moving details for full moving requests, but not the free-text note', () => {
+    const r = bookingSchema.safeParse({ ...base, form: 'full', serviceType: 'moving', description: '' })
     expect(r.success).toBe(false)
-    const paths = r.error!.issues.map((i) => i.path[0])
-    expect(paths).toContain('pickupAddress')
-    expect(paths).toContain('destinationAddress')
+    expect(new Set(r.error!.issues.map((i) => i.path[0]))).toEqual(
+      new Set(['preferredDate', 'pickupAddress', 'destinationAddress', 'accessDetails', 'itemDetails', 'packing']),
+    )
+    const ok = bookingSchema.safeParse({
+      ...base,
+      form: 'full',
+      serviceType: 'moving',
+      description: '',
+      preferredDate: tomorrow,
+      pickupAddress: '1 King St W',
+      destinationAddress: '2 Queen St W',
+      accessDetails: 'Elevator at both',
+      itemDetails: 'Queen bed, sofa',
+      packing: 'Not sure yet',
+    })
+    expect(ok.success).toBe(true)
+    expect(bookingSchema.safeParse({ ...ok.data, packing: 'Bubble wrap everything' }).success).toBe(false)
+  })
+
+  it('requires a location for full tasks requests', () => {
+    const r = bookingSchema.safeParse({ ...base, form: 'full', serviceType: 'tasks' })
+    expect(r.error?.issues.map((i) => i.path[0])).toEqual(['pickupAddress'])
   })
 
   it('requires item details for full delivery requests', () => {

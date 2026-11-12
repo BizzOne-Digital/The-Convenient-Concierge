@@ -386,8 +386,20 @@ details.faq[open]::details-content {
 #tcc-splash {
   display: none;
 }
+/* Timeline: clock 0.2–1.4s, logo 1.45–2.45s, tagline types in from 1.9s and holds until --splash-out,
+   then the iris opens. Keep TOTAL_MS in splash.tsx in sync. */
 html[data-splash='on'] {
+  --splash-out: 6s;
+  --splash-iris: calc(var(--splash-out) + 0.15s);
   overflow: hidden;
+}
+/* Skipped: fade the whole splash out instead of cutting to the page. */
+html[data-splash='on'][data-splash-skip] #tcc-splash {
+  animation: splash-fade-out 0.4s ease forwards;
+  pointer-events: none;
+}
+html[data-splash='on'][data-splash-skip] #main {
+  animation: none;
 }
 html[data-splash='on'] #tcc-splash {
   --cx: 50%;
@@ -400,13 +412,13 @@ html[data-splash='on'] #tcc-splash {
   cursor: pointer;
   background: radial-gradient(ellipse 70% 60% at var(--cx) var(--cy), #1d1b1e 0%, var(--color-ink) 70%);
   mask-image: radial-gradient(circle at var(--cx) var(--cy), transparent var(--hole), #000 calc(var(--hole) + 0.5px));
-  animation: splash-iris 0.85s cubic-bezier(0.76, 0, 0.24, 1) 2.55s forwards;
+  animation: splash-iris 0.9s cubic-bezier(0.76, 0, 0.24, 1) var(--splash-iris) forwards;
 }
 @keyframes splash-iris {
   to { --hole: 150vmax; }
 }
 html[data-splash='on'] #main {
-  animation: splash-site-in 1.2s var(--ease-out-expo) 2.6s both;
+  animation: splash-site-in 1.2s var(--ease-out-expo) var(--splash-iris) both;
 }
 @keyframes splash-site-in {
   from { scale: 1.06; }
@@ -422,14 +434,14 @@ html[data-splash='on'] #main {
   translate: -50% -50%;
   display: grid;
   place-items: center;
-  animation: splash-fade-out 0.35s ease-in 2.3s forwards;
+  animation: splash-fade-out 0.5s ease-in var(--splash-out) forwards;
 }
 .splash-stage > * {
   grid-area: 1 / 1;
 }
 .splash-clock {
-  width: clamp(150px, 30vw, 230px);
-  animation: splash-clock-out 0.5s cubic-bezier(0.55, 0, 1, 0.45) 1.4s forwards;
+  width: min(clamp(150px, 30vw, 230px), 55vh);
+  animation: splash-clock-out 0.6s cubic-bezier(0.55, 0, 1, 0.45) 1.4s forwards;
 }
 .splash-tick {
   opacity: 0;
@@ -460,13 +472,14 @@ html[data-splash='on'] #main {
   animation: splash-spin-hour 1.25s cubic-bezier(0.65, 0, 0.35, 1) 0.2s both;
 }
 .splash-logo {
-  width: min(340px, 72vw);
+  /* 68vh keeps the logo and tagline clear of the bottom row on landscape phones. */
+  width: min(340px, 72vw, 68vh);
   height: auto;
   opacity: 0;
   clip-path: inset(0 100% 0 0);
   filter: blur(12px);
   scale: 1.06;
-  animation: splash-logo-in 0.9s var(--ease-out-expo) 1.45s forwards;
+  animation: splash-logo-in 1s var(--ease-out-expo) 1.45s forwards;
 }
 .splash-tagline {
   position: absolute;
@@ -490,8 +503,8 @@ html[data-splash='on'] #main {
   opacity: 0;
   translate: 0 0.55em;
   filter: blur(5px);
-  animation: splash-char-in 0.7s var(--ease-out-expo) forwards;
-  animation-delay: calc(1.65s + var(--i) * 13ms);
+  animation: splash-char-in 0.9s var(--ease-out-expo) forwards;
+  animation-delay: calc(1.9s + var(--i) * 18ms);
 }
 .splash-meta {
   position: absolute;
@@ -506,10 +519,23 @@ html[data-splash='on'] #main {
   text-transform: uppercase;
   color: rgb(255 255 255 / 0.45);
   opacity: 0;
-  animation: splash-fade-in 0.6s ease 0.3s forwards, splash-fade-out 0.3s ease 2.3s forwards;
+  animation: splash-fade-in 0.6s ease 0.3s forwards, splash-fade-out 0.4s ease var(--splash-out) forwards;
 }
 @media (max-width: 639px) {
-  .splash-meta > span:first-child { visibility: hidden; }
+  .splash-meta > span:first-child { display: none; }
+}
+/* Landscape phones: keep the tagline clear of the bottom row. */
+@media (max-height: 480px) {
+  html[data-splash='on'] #tcc-splash { --cy: 40%; }
+  .splash-clock { width: 42vh; }
+  .splash-tagline { top: calc(100% + 1rem); }
+  .splash-meta { bottom: 0.75rem; }
+  .splash-meta > span:first-child { display: none; }
+  .splash-count { font-size: 1.5rem; }
+}
+.splash-skip {
+  opacity: 0;
+  animation: splash-fade-in 0.6s ease 2.5s forwards;
 }
 .splash-count {
   font-family: var(--font-serif);
@@ -518,7 +544,7 @@ html[data-splash='on'] #main {
   letter-spacing: 0;
   color: #fff;
   counter-reset: n var(--n);
-  animation: splash-count 2.15s cubic-bezier(0.65, 0, 0.35, 1) 0.1s forwards;
+  animation: splash-count calc(var(--splash-out) - 0.1s) cubic-bezier(0.65, 0, 0.35, 1) 0.1s forwards;
 }
 .splash-count::after {
   content: counter(n, decimal-leading-zero);
@@ -529,7 +555,7 @@ html[data-splash='on'] #main {
   bottom: 0;
   height: 2px;
   background: rgb(255 255 255 / 0.06);
-  animation: splash-fade-out 0.3s ease 2.35s forwards;
+  animation: splash-fade-out 0.4s ease var(--splash-out) forwards;
 }
 .splash-progress > span {
   display: block;
@@ -538,7 +564,7 @@ html[data-splash='on'] #main {
   box-shadow: 0 0 16px rgb(228 68 66 / 0.8);
   transform-origin: left;
   scale: 0 1;
-  animation: splash-grow 2.15s cubic-bezier(0.65, 0, 0.35, 1) 0.1s forwards;
+  animation: splash-grow calc(var(--splash-out) - 0.1s) cubic-bezier(0.65, 0, 0.35, 1) 0.1s forwards;
 }
 .splash-ring {
   position: absolute;
@@ -551,7 +577,7 @@ html[data-splash='on'] #main {
   border: 2px solid var(--color-red-warm);
   box-shadow: 0 0 40px 4px rgb(228 68 66 / 0.55), inset 0 0 30px rgb(228 68 66 / 0.35);
   opacity: 0;
-  animation: splash-ring 0.85s ease 2.55s forwards;
+  animation: splash-ring 0.9s ease var(--splash-iris) forwards;
 }
 @keyframes splash-fade-in { to { opacity: 1; } }
 @keyframes splash-fade-out { to { opacity: 0; } }

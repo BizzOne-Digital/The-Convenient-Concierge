@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { ArrowRight, Check, Download, Info, Phone } from 'lucide-react'
 import { PageHero } from '@/components/layout/page-hero'
 import { BookingCTA } from '@/components/sections/booking-cta'
-import { ButtonLink } from '@/components/ui/button'
+import { ArrowLink, ButtonLink } from '@/components/ui/button'
 import { ServiceIcon } from '@/components/ui/icons'
 import { JsonLd } from '@/components/ui/json-ld'
 import { Reveal } from '@/components/ui/reveal'
@@ -47,11 +47,11 @@ export default async function ServicePage({ params }: Props) {
             </>
           ) : (
             <>
-              Your to-do list, <span className="em-red">handled.</span>
+              Tasks &amp; Errands Services in Toronto – <span className="em-red">Let Us Take Care of Your To-Do List</span>
             </>
           )
         }
-        lead={s.summary}
+        lead={s.heroLead ?? s.summary}
         image={s.type === 'moving' ? '/images/photos/toronto-skyline-sunset.jpg' : s.type === 'delivery' ? '/images/photos/toronto-aerial-golden-hour.jpg' : '/images/photos/etobicoke-skyline-sunset.jpg'}
         imagePosition={s.type === 'tasks' ? 'center 35%' : 'center'}
         aside={
@@ -89,11 +89,11 @@ export default async function ServicePage({ params }: Props) {
 
             <Reveal delay={0.05}>
               <h2 id="what-title" className="mt-16 text-h3">
-                What we handle
+                {s.listHeading}
               </h2>
               <ul className="mt-8 grid gap-px overflow-hidden rounded-[18px] bg-line sm:grid-cols-2">
                 {s.items.map((item) => (
-                  <li key={item} className="flex items-start gap-3.5 bg-paper p-5">
+                  <li key={item} className="flex items-start gap-3.5 bg-paper p-5 sm:last:odd:col-span-2">
                     <span className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full bg-red/[0.08] text-red">
                       <Check aria-hidden className="size-3.5" strokeWidth={2.75} />
                     </span>
@@ -101,6 +101,9 @@ export default async function ServicePage({ params }: Props) {
                   </li>
                 ))}
               </ul>
+              <ArrowLink href={`/services/${s.related.slug}`} className="mt-6">
+                {s.related.label}
+              </ArrowLink>
             </Reveal>
 
             {s.benefits && (
@@ -126,7 +129,7 @@ export default async function ServicePage({ params }: Props) {
                       <h2 className="font-semibold">Before your move</h2>
                       <p className="mt-2 text-muted">
                         Please download our moving checklist, fill it in and attach it to your request so we can plan your move accurately.{' '}
-                        <strong className="font-semibold text-text">We do not offer disassembly or assembly services.</strong>
+                        <strong className="font-semibold text-text">{s.notice} Let us know which items need it.</strong>
                       </p>
                       <a href={business.movingChecklistUrl} download className="mt-5 inline-flex items-center gap-2 font-semibold text-red underline-offset-4 hover:underline">
                         <Download aria-hidden className="size-4" />

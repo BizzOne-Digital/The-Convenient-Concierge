@@ -30,6 +30,9 @@ export const serviceAreas = [
   'East Mississauga',
 ] as const
 
+/** One consistent summary of the service area. Only east Mississauga is served, so the full city is never claimed. */
+export const areaSummary = 'Toronto, Etobicoke and East Mississauga'
+
 export const serviceTypes = ['moving', 'delivery', 'tasks'] as const
 export type ServiceType = (typeof serviceTypes)[number]
 
@@ -40,6 +43,8 @@ export type Service = {
   shortName: string
   icon: 'moving' | 'delivery' | 'tasks'
   summary: string
+  /** Hero paragraph on the service page, when it differs from the shared summary. */
+  heroLead?: string
   intro: string
   items: string[]
   /** Short labels for the services overview, when an item is too long to scan. */
@@ -50,6 +55,10 @@ export type Service = {
   cardCta: string
   images: { src: string; alt: string }[]
   seo: { title: string; description: string }
+  /** H2 above the service list on the service page. */
+  listHeading: string
+  /** Contextual link to a related service page. */
+  related: { slug: string; label: string }
 }
 
 export const services: Service[] = [
@@ -60,22 +69,21 @@ export const services: Service[] = [
     shortName: 'Moving',
     icon: 'moving',
     summary:
-      "We make moving easier, whether you're relocating a home, condo, apartment, or office. From furniture and appliances to smaller moves, we help take the stress out of moving day.",
+      'Toronto moving services for homes, condos, apartments and offices. From small and single-item moves to full relocations, we load, unload, wrap and protect your furniture, and take care of assembly and disassembly.',
     intro:
-      'We can move houses, condos and apartments. We also move appliances and provide junk removal and facilitate storage for staging for real-estate brokerages.',
+      "Whether you're moving a house, condo, apartment or office, we handle the heavy lifting. As condo movers and small movers in Toronto and Etobicoke, we wrap and protect your furniture, take it apart and put it back together, and move appliances and heavy items. Need movers without a truck? Our movers-only service covers loading and unloading. We also handle storage moves, furniture staging for real-estate brokerages and junk removal.",
     items: [
-      'Furniture & Appliances',
-      'Office Furniture',
-      'Moving Helpers',
-      'Junk Removal',
-      'Heavy Items',
-      'Bachelor & 1 Bedroom Units',
-      'Home & Office Moves',
-      'Micro Moves',
-      'House or Condo Items to Storage',
-      'Furniture Removal for Staging',
+      'Residential, condo and apartment moves',
+      'Small moves and single-item moves',
+      'Movers-only services, including loading and unloading',
+      'Furniture wrapping and protection',
+      'Furniture assembly and disassembly',
+      'Storage moves and furniture staging',
+      'Office moves and heavy-item moving',
+      'Furniture and appliance moves',
+      'Junk removal',
     ],
-    notice: 'Please note: we do not offer disassembly or assembly services.',
+    notice: 'Furniture assembly and disassembly are included in our moving services.',
     cta: 'Request a Moving Quote',
     cardCta: 'Explore Moving',
     images: [
@@ -83,10 +91,12 @@ export const services: Service[] = [
       { src: '/images/services/moving-boxes.jpg', alt: 'Packed moving boxes, a rolled rug and a floor lamp ready in an empty room' },
     ],
     seo: {
-      title: 'Moving Services in Toronto & Etobicoke',
+      title: 'Toronto Moving Services: Condo, Small & Office Movers',
       description:
-        'Home, condo, apartment and office moves, furniture and appliances, micro moves, junk removal and staging removals across Toronto, Etobicoke and East Mississauga.',
+        'Condo, apartment, small and office moves in Toronto, Etobicoke and East Mississauga. Movers-only loading, furniture assembly, staging and storage moves.',
     },
+    listHeading: 'Our Toronto moving services',
+    related: { slug: 'pick-up-delivery', label: 'Moving just one item? See furniture pickup and delivery' },
   },
   {
     type: 'delivery',
@@ -95,21 +105,25 @@ export const services: Service[] = [
     shortName: 'Delivery',
     icon: 'delivery',
     summary:
-      'From retail and marketplace purchases to corporate, private, and event deliveries, we collect and deliver the items you need.',
-    intro: 'The Convenient Concierge will pick up and deliver anything you may need.',
+      "Furniture pickup and delivery across Toronto and the GTA. We collect Facebook Marketplace finds, IKEA and retail purchases, appliances and large, bulky items you can't easily move yourself, and handle corporate and event deliveries.",
+    intro:
+      "Bought something that won't fit in your car? The Convenient Concierge picks up furniture, appliances and other large or bulky items from Facebook Marketplace sellers, IKEA, big-box and curbside retail stores, and delivers them to your home or office across Toronto and the GTA. It's the simple way to get Facebook Marketplace delivery in Toronto without borrowing a truck.",
     items: [
-      'Picking up your purchases such as curbside retail, Facebook Marketplace, IKEA, big-box retail and more, and delivering them to you',
-      'Corporate Deliveries',
-      'Private Deliveries',
-      'Event Deliveries',
-      'Out-of-Town Deliveries',
-      'Construction Materials',
-      'Garden Centre Pickups',
-      'Donations Pick-up & Drop-off',
-      'Penguin Pick-Ups',
-      'Propane Tanks',
+      'Furniture pickup and delivery',
+      'Facebook Marketplace purchases',
+      'IKEA and retail store pickups',
+      'Appliance pickup and delivery',
+      'Corporate deliveries',
+      'Event deliveries',
+      'Large and bulky-item transportation',
+      'Private deliveries',
+      'Out-of-town deliveries',
+      'Construction materials',
+      'Garden centre pickups',
+      'Donations pick-up and drop-off',
+      'Penguin pick-ups',
+      'Propane tanks',
     ],
-    highlights: ['Retail, Marketplace & IKEA pickups', 'Corporate Deliveries', 'Private Deliveries', 'Event Deliveries', 'Out-of-Town Deliveries', 'Donations Pick-up & Drop-off'],
     cta: 'Submit a Pickup / Delivery Request',
     cardCta: 'Explore Delivery',
     images: [
@@ -117,10 +131,12 @@ export const services: Service[] = [
       { src: '/images/services/delivery-parcel.jpg', alt: 'A courier holding a sealed cardboard parcel' },
     ],
     seo: {
-      title: 'Pick-up & Delivery Services in Toronto',
+      title: 'Furniture Pickup & Delivery in Toronto',
       description:
-        'Marketplace, IKEA, big-box and curbside pickups, plus corporate, private, event and out-of-town deliveries across Toronto and nearby neighbourhoods.',
+        'Furniture pickup and delivery in Toronto, plus Facebook Marketplace delivery, IKEA and retail pickups, appliances, bulky items, and corporate and event deliveries.',
     },
+    listHeading: 'Furniture pickup and delivery services',
+    related: { slug: 'moving', label: 'Moving a whole home or condo? See our Toronto moving services' },
   },
   {
     type: 'tasks',
@@ -130,19 +146,22 @@ export const services: Service[] = [
     icon: 'tasks',
     summary:
       'From shopping and grocery runs to gift purchases and everyday errands, we take care of the tasks that fill up your day.',
+    // Client-supplied wording: keep verbatim.
+    heroLead:
+      'Life gets busy, and sometimes there simply aren’t enough hours in the day. The Convenient Concierge provides reliable, personalized tasks and errands services throughout Toronto and the GTA. Whether you need shopping completed, items picked up, help around your home, or assistance with a special request, we’re here to make your day easier.',
     intro:
-      'Life in Toronto can be fast-paced and demanding. Between work, family, and personal commitments, finding time to complete tasks and errands can be a challenge. At The Convenient Concierge, we understand the value of your time and aim to make your life easier by taking care of your tasks and errands efficiently and reliably.',
+      'Searching for errand services Toronto residents can rely on? As a personal concierge Toronto households and businesses can call on, we handle grocery pickup and delivery, personal shopping, gift and card purchases, store pickups and donation drop-offs, including for out-of-town clients who need something taken care of locally.',
     items: [
-      'Out-of-town client? No problem',
-      'Gift & Card Purchases',
-      'Pick-up & Delivery',
-      'Shopping',
-      'Groceries',
-      'Shopping at All Stores',
+      'Grocery shopping and personal shopping',
+      'Gift and card purchases',
+      'Errand running and store pickups',
+      'Donation drop-offs',
+      'Assistance for out-of-town clients',
+      'Personalized errands for residential and corporate customers',
       'Shop & Ship',
     ],
     benefits: ['Convenience', 'Reliability', 'Personalized Service', 'Local Expertise'],
-    cta: 'Submit a Tasks & Errands Request',
+    cta: 'Tell Us What You Need',
     cardCta: 'Explore Tasks & Errands',
     images: [
       { src: '/images/services/errands-shopping.jpg', alt: 'A hand holding colourful shopping bags in a bright shopping arcade' },
@@ -150,10 +169,12 @@ export const services: Service[] = [
       { src: '/images/services/errands-gifts.jpg', alt: 'A stack of wrapped gifts tied with ribbon' },
     ],
     seo: {
-      title: 'Tasks & Errands Concierge in Toronto',
+      title: 'Tasks & Errands Services in Toronto',
       description:
-        'Shopping, groceries, gift and card purchases, shop & ship and everyday errands handled for busy Toronto residents and out-of-town clients.',
+        'Personal concierge services in Toronto: grocery pickup and delivery, personal shopping, gift and card purchases, store pickups and donation drop-offs.',
     },
+    listHeading: 'Tasks and errands we handle in Toronto',
+    related: { slug: 'pick-up-delivery', label: 'Need a large purchase collected? See Facebook Marketplace delivery' },
   },
 ]
 
@@ -209,7 +230,7 @@ export const trustPoints = [
   { icon: 'building', title: 'Residential & Corporate', text: 'Homes, condos, offices and events' },
   { icon: 'heart', title: 'Personalized Attention', text: 'Built around your exact needs' },
   { icon: 'clock', title: 'Convenience & Reliability', text: 'Handled promptly, every time' },
-  { icon: 'pin', title: 'Toronto & Nearby', text: 'Downtown to East Mississauga' },
+  { icon: 'pin', title: 'Toronto & Nearby', text: 'Toronto, Etobicoke & East Mississauga' },
 ] as const
 
 export const navLinks = [
@@ -241,7 +262,7 @@ export const defaultFaqs = [
   {
     question: 'Do you provide moving assistance for smaller moves?',
     answer:
-      'Yes. Alongside home and office moves we handle micro moves, bachelor and one-bedroom units, single heavy items, furniture and appliances, and moving helpers.',
+      'Yes. Alongside home, condo, apartment and office moves we handle small moves, single-item moves, heavy items, furniture and appliances, and movers-only services for loading and unloading.',
   },
   {
     question: 'Can you collect marketplace purchases?',
@@ -256,7 +277,7 @@ export const defaultFaqs = [
   {
     question: 'Do you offer furniture assembly or disassembly?',
     answer:
-      'No. We do not offer disassembly or assembly services. Please have furniture disassembled and ready before your move.',
+      'Yes. Furniture assembly and disassembly are part of our moving services. Let us know which items need it when you request your quote.',
   },
   {
     question: 'How do I request a delivery or moving quote?',

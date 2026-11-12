@@ -1,13 +1,28 @@
 import { NextResponse } from 'next/server'
-import { bookingSchema, fieldErrors, looksLikeSpam, pick } from '@/lib/validations'
+import { MAX_PHOTOS, bookingSchema, fieldErrors, looksLikeSpam, pick } from '@/lib/validations'
 import { clientIp, rateLimit } from '@/lib/rate-limit'
-import { isAllowedAttachment, maxUploadBytes, sniffFileType } from '@/lib/uploads'
+import { PRIVATE_FOLDER, isAllowedAttachment, isAllowedImage, maxUploadBytes, sniffFileType, type Sniffed } from '@/lib/uploads'
 import { saveUpload } from '@/lib/upload-store'
 import { attachmentUrl, createBookingInquiry } from '@/lib/inquiries'
+import { StoredUpload } from '@/models'
 
 export const runtime = 'nodejs'
 
-const FIELDS = ['form', 'name', 'email', 'phone', 'serviceType', 'preferredDate', 'pickupAddress', 'destinationAddress', 'propertyType', 'itemDetails', 'description'] as const
+const FIELDS = [
+  'form',
+  'name',
+  'email',
+  'phone',
+  'serviceType',
+  'preferredDate',
+  'pickupAddress',
+  'destinationAddress',
+  'propertyType',
+  'accessDetails',
+  'packing',
+  'itemDetails',
+  'description',
+] as const
 const SUCCESS_MESSAGE =
   "Thank you! Your request has been received. This is not a confirmed booking yet. Our team will contact you shortly to confirm the details."
 
@@ -38,25 +53,45 @@ export async function POST(req: Request) {
   const parsed = bookingSchema.safeParse(pick(fd, FIELDS))
   if (!parsed.success) return fail(422, 'Please check the highlighted fields.', fieldErrors(parsed.error))
 
-  let attachment = ''
-  const file = fd.get('attachment')
-  if (file instanceof File && file.size > 0) {
+  // Validate every file before storing any of them.
+  const nonEmpty = (v: FormDataEntryValue | null): v is File => v instanceof File && v.size > 0
+  const checklist = fd.get('attachment')
+  const photos = fd.getAll('photos').filter(nonEmpty)
+  const files: { field: 'attachment' | 'photos'; buf: Buffer; type: Sniffed }[] = []
+  if (nonEmpty(checklist) || photos.length) {
     if (parsed.data.serviceType !== 'moving') return fail(422, 'Attachments are only accepted for moving requests.')
-    if (file.size > max) return fail(413, `The attachment must be under ${Math.floor(max / 1024 / 1024)} MB.`, { attachment: ['File is too large'] })
-    const buf = Buffer.from(await file.arrayBuffer())
-    const type = sniffFileType(buf)
-    if (!isAllowedAttachment(type)) return fail(422, 'Please attach a PDF, JPG, PNG, WebP or GIF file.', { attachment: ['Unsupported file type'] })
-    try {
-      const saved = await saveUpload('bookings', buf, type)
-      attachment = attachmentUrl(saved.filename)
-    } catch {
-      return fail(503, 'We could not save your attachment. Please try again or email it to us.')
+    if (photos.length > MAX_PHOTOS) return fail(422, `Please attach up to ${MAX_PHOTOS} photos.`, { photos: [`Up to ${MAX_PHOTOS} photos`] })
+    for (const [field, file] of [...(nonEmpty(checklist) ? [['attachment', checklist] as const] : []), ...photos.map((p) => ['photos', p] as const)]) {
+      if (file.size > max) return fail(413, `Attachments must be under ${Math.floor(max / 1024 / 1024)} MB in total.`, { [field]: ['File is too large'] })
+      const buf = Buffer.from(await file.arrayBuffer())
+      const type = sniffFileType(buf)
+      if (field === 'attachment' && !isAllowedAttachment(type))
+        return fail(422, 'Please attach a PDF, JPG, PNG, WebP or GIF file.', { attachment: ['Unsupported file type'] })
+      if (field === 'photos' && !isAllowedImage(type)) return fail(422, 'Photos must be JPG, PNG, WebP or GIF images.', { photos: ['Unsupported file type'] })
+      files.push({ field, buf, type: type! })
     }
   }
 
+  const saved: string[] = []
+  const cleanup = () => StoredUpload.deleteMany({ folder: PRIVATE_FOLDER, filename: { $in: saved } }).catch(() => {})
+  let attachment = ''
+  const photoUrls: string[] = []
   try {
-    await createBookingInquiry(parsed.data, attachment)
+    for (const f of files) {
+      const { filename } = await saveUpload(PRIVATE_FOLDER, f.buf, f.type)
+      saved.push(filename)
+      if (f.field === 'attachment') attachment = attachmentUrl(filename)
+      else photoUrls.push(attachmentUrl(filename))
+    }
   } catch {
+    await cleanup()
+    return fail(503, 'We could not save your attachments. Please try again or email them to us.')
+  }
+
+  try {
+    await createBookingInquiry(parsed.data, attachment, photoUrls)
+  } catch {
+    await cleanup()
     return fail(503, 'We could not save your request right now. Please call or email us instead.')
   }
   return NextResponse.json({ success: true, message: SUCCESS_MESSAGE })

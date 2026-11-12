@@ -19,18 +19,28 @@ describe('business content integrity', () => {
   })
 
   it('preserves every listed service from the original website', () => {
-    expect(getService('moving')!.items).toHaveLength(10)
-    expect(getService('pick-up-delivery')!.items).toHaveLength(10)
+    expect(getService('moving')!.items).toHaveLength(9)
+    expect(getService('pick-up-delivery')!.items).toHaveLength(14)
     expect(getService('tasks-errands')!.items).toHaveLength(7)
     expect(getService('tasks-errands')!.benefits).toEqual(['Convenience', 'Reliability', 'Personalized Service', 'Local Expertise'])
     const all = services.flatMap((s) => s.items).join('|')
-    for (const must of ['Penguin Pick-Ups', 'Propane Tanks', 'Junk Removal', 'Micro Moves', 'Furniture Removal for Staging', 'Shop & Ship', 'Garden Centre'])
+    for (const must of ['Penguin pick-ups', 'Propane tanks', 'Facebook Marketplace', 'Junk removal', 'Small moves and single-item moves', 'Storage moves and furniture staging', 'Shop & Ship', 'Garden centre'])
       expect(all).toContain(must)
   })
 
-  it('keeps the no-assembly limitation on moving', () => {
-    expect(getService('moving')!.notice).toMatch(/do not offer disassembly or assembly/i)
-    expect(defaultFaqs.find((f) => /assembly/i.test(f.question))!.answer).toMatch(/^No\./)
+  it('uses the client-supplied Tasks & Errands wording verbatim, with the search terms', () => {
+    const t = getService('tasks-errands')!
+    expect(t.heroLead).toBe(
+      'Life gets busy, and sometimes there simply aren’t enough hours in the day. The Convenient Concierge provides reliable, personalized tasks and errands services throughout Toronto and the GTA. Whether you need shopping completed, items picked up, help around your home, or assistance with a special request, we’re here to make your day easier.',
+    )
+    expect(t.cta).toBe('Tell Us What You Need')
+    for (const term of ['errand services toronto', 'personal concierge toronto', 'grocery pickup and delivery']) expect(t.intro.toLowerCase()).toContain(term)
+  })
+
+  it('offers furniture assembly and disassembly on moving, with no contradicting copy', () => {
+    expect(getService('moving')!.items).toContain('Furniture assembly and disassembly')
+    expect(defaultFaqs.find((f) => /assembly/i.test(f.question))!.answer).toMatch(/^Yes\./)
+    expect(JSON.stringify({ services, defaultFaqs })).not.toMatch(/do not offer/i)
   })
 
   it('keeps all 27 organisations and 11 service areas, without duplicates', () => {

@@ -19,6 +19,10 @@ const preferredDate = z
   .refine((v) => v === '' || (/^\d{4}-\d{2}-\d{2}$/.test(v) && !Number.isNaN(Date.parse(v))), 'Please choose a valid date')
   .refine((v) => v === '' || v >= new Date(Date.now() - 864e5).toISOString().slice(0, 10), 'Please choose a date in the future')
 
+export const packingOptions = ['Everything will be packed and ready', 'I would like help with packing', 'Not sure yet'] as const
+/** Moving photos per request. Kept small: the whole request must fit in one 4 MB body. */
+export const MAX_PHOTOS = 5
+
 export const bookingSchema = z
   .object({
     form: z.enum(['quick', 'full']).default('full'),
@@ -30,23 +34,38 @@ export const bookingSchema = z
     pickupAddress: optionalText(300),
     destinationAddress: optionalText(300),
     propertyType: optionalText(60),
+    accessDetails: optionalText(500),
+    packing: z.enum([...packingOptions, ''], { error: 'Please choose an option' }).optional().default(''),
     itemDetails: optionalText(2000),
-    description: text(4000).min(10, 'Please tell us a little more about your request (at least 10 characters)'),
+    description: optionalText(4000),
+  })
+  // A full moving request carries its detail in the dedicated fields, so the free-text note is optional there.
+  // `when` keeps this check running even if other fields failed, so every error shows at once.
+  .refine((v) => (v.form === 'full' && v.serviceType === 'moving') || (typeof v.description === 'string' && v.description.length >= 10), {
+    path: ['description'],
+    message: 'Please tell us a little more about your request (at least 10 characters)',
+    when: (p) => typeof (p.value as { description?: unknown })?.description === 'string',
   })
   .superRefine((v, ctx) => {
-    if (v.form !== 'full') return
-    const need = (field: 'pickupAddress' | 'destinationAddress' | 'itemDetails', message: string) => {
+    const full = v.form === 'full'
+    if (!full) return
+    const need = (field: 'pickupAddress' | 'destinationAddress' | 'itemDetails' | 'preferredDate' | 'accessDetails' | 'packing', message: string) => {
       if (!v[field]) ctx.addIssue({ code: 'custom', path: [field], message })
     }
     if (v.serviceType === 'moving') {
-      need('pickupAddress', 'Please enter the address you are moving from')
-      need('destinationAddress', 'Please enter the address you are moving to')
+      need('preferredDate', 'Please choose your preferred moving date')
+      need('pickupAddress', 'Please enter the pickup address')
+      need('destinationAddress', 'Please enter the destination address')
+      need('accessDetails', 'Please tell us about stairs or elevator access')
+      need('itemDetails', 'Please list the main furniture and items')
+      need('packing', 'Please choose a packing option')
     }
     if (v.serviceType === 'delivery') {
       need('pickupAddress', 'Please enter the pickup location')
       need('destinationAddress', 'Please enter the delivery location')
       need('itemDetails', 'Please describe the item(s)')
     }
+    if (v.serviceType === 'tasks') need('pickupAddress', 'Please tell us where the service is needed')
   })
 export type BookingInput = z.infer<typeof bookingSchema>
 

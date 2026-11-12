@@ -11,9 +11,9 @@ import { getSiteSettings } from '@/lib/data'
 import { pageMetadata } from '@/lib/seo'
 
 export const metadata = pageMetadata({
-  title: 'About Us',
+  title: 'About Us: Personal Concierge Services in Toronto',
   description:
-    'The Convenient Concierge: customer-service specialists for deliveries, moving, tasks and errands. We build strong relationships with residential and corporate clients across Toronto.',
+    'Meet The Convenient Concierge: customer-service specialists for moving, deliveries, tasks and errands, serving residential and corporate clients in Toronto and Etobicoke.',
   path: '/about',
 })
 
@@ -106,7 +106,8 @@ export default async function AboutPage() {
               Toronto&rsquo;s west end, <span className="em-red">and beyond.</span>
             </h2>
             <p className="mt-6 max-w-md text-white/65">
-              We service the neighbourhoods below, and out-of-town deliveries are available on request. Not sure if you&rsquo;re covered? Just ask.
+              Our Toronto and Etobicoke moving services, deliveries and errands cover the neighbourhoods below, through to East Mississauga.
+              Out-of-town deliveries are available on request. Not sure if you&rsquo;re covered? Just ask.
             </p>
             <ButtonLink href="/contact" variant="outline-light" className="mt-8">
               Check your area

@@ -1,9 +1,10 @@
 'use client'
 
 import { useRef, useState, type FormEvent } from 'react'
-import { ArrowRight, CircleCheck, Download, FileUp, LoaderCircle, Phone } from 'lucide-react'
+import { ArrowRight, CircleCheck, Download, FileUp, ImagePlus, LoaderCircle, Phone } from 'lucide-react'
 import { business, services, type ServiceType } from '@/lib/content'
-import { bookingSchema, fieldErrors } from '@/lib/validations'
+import { MAX_PHOTOS, bookingSchema, fieldErrors, packingOptions } from '@/lib/validations'
+import { maxUploadBytes } from '@/lib/uploads'
 import { ServiceIcon } from '@/components/ui/icons'
 import { buttonClass } from '@/components/ui/button'
 import { Field, SpamGuards, describe, focusFirstError, idle, inputClass, postForm, type SubmitState } from './fields'
@@ -12,10 +13,10 @@ const propertyTypes = ['House', 'Condo', 'Apartment', 'Office', 'Storage unit', 
 
 const copy: Record<ServiceType, { from: string; to: string; desc: string; descHint: string }> = {
   moving: {
-    from: 'Moving from',
-    to: 'Moving to',
-    desc: 'Tell us about your move',
-    descHint: 'Main items, floors, elevator or stairs, parking, anything we should know.',
+    from: 'Pickup address',
+    to: 'Destination address',
+    desc: 'Anything else we should know?',
+    descHint: 'Parking, timing or anything else that helps us plan your move.',
   },
   delivery: {
     from: 'Pickup location',
@@ -24,20 +25,40 @@ const copy: Record<ServiceType, { from: string; to: string; desc: string; descHi
     descHint: 'Timing, order number, pickup instructions or access details.',
   },
   tasks: {
-    from: 'Relevant location or area',
+    from: 'Where is the service needed?',
     to: '',
     desc: 'Describe your task or errand',
     descHint: 'Stores, shopping list, instructions and any deadlines.',
   },
 }
 
+const PHOTO_EDGE = 1600
+
+/** Downscales a photo in the browser (also strips EXIF/GPS) so several phone photos fit in one request. */
+async function shrinkPhoto(file: File): Promise<Blob> {
+  try {
+    const bmp = await createImageBitmap(file)
+    const scale = Math.min(1, PHOTO_EDGE / Math.max(bmp.width, bmp.height))
+    const canvas = document.createElement('canvas')
+    canvas.width = Math.round(bmp.width * scale)
+    canvas.height = Math.round(bmp.height * scale)
+    canvas.getContext('2d')!.drawImage(bmp, 0, 0, canvas.width, canvas.height)
+    bmp.close()
+    return (await new Promise<Blob | null>((r) => canvas.toBlob(r, 'image/jpeg', 0.8))) ?? file
+  } catch {
+    return file // the server re-checks the real type and size
+  }
+}
+
 export function BookingForm({ variant = 'full', defaultService }: { variant?: 'full' | 'quick'; defaultService?: ServiceType }) {
   const [service, setService] = useState<ServiceType | ''>(defaultService ?? '')
   const [state, setState] = useState<SubmitState>(idle)
   const [fileName, setFileName] = useState('')
+  const [photoCount, setPhotoCount] = useState(0)
   const form = useRef<HTMLFormElement>(null)
   const today = new Date().toISOString().slice(0, 10)
   const full = variant === 'full'
+  const fullMoving = full && service === 'moving'
   const e = state.errors
   const err = (k: string) => e[k]?.[0]
   const t = service ? copy[service] : null
@@ -54,6 +75,22 @@ export function BookingForm({ variant = 'full', defaultService }: { variant?: 'f
       return
     }
     setState({ ...idle, status: 'submitting' })
+    const photos = fd.getAll('photos').filter((f): f is File => f instanceof File && f.size > 0)
+    fd.delete('photos')
+    const fileError = (errors: Record<string, string[]>, message: string) => {
+      setState({ status: 'error', message, errors })
+      requestAnimationFrame(() => focusFirstError(form.current, errors))
+    }
+    if (photos.length > MAX_PHOTOS) return fileError({ photos: [`Please choose up to ${MAX_PHOTOS} photos`] }, `Please attach up to ${MAX_PHOTOS} photos.`)
+    const shrunk = await Promise.all(photos.map(shrinkPhoto))
+    shrunk.forEach((b, i) => fd.append('photos', b, `photo-${i + 1}.jpg`))
+    const checklist = fd.get('attachment')
+    const total = shrunk.reduce((n, b) => n + b.size, checklist instanceof File ? checklist.size : 0)
+    if (total > maxUploadBytes())
+      return fileError(
+        { photos: ['Attachments are too large'] },
+        `Attachments must be under ${maxUploadBytes() / 1024 / 1024} MB in total. Please remove a photo or email it to us.`,
+      )
     const result = await postForm('/api/bookings', fd)
     setState(result)
     if (result.status === 'error') requestAnimationFrame(() => focusFirstError(form.current, result.errors))
@@ -148,7 +185,12 @@ export function BookingForm({ variant = 'full', defaultService }: { variant?: 'f
             </select>
           </Field>
         )}
-        <Field id="preferredDate" label="Preferred date" optional error={err('preferredDate')}>
+        <Field
+          id="preferredDate"
+          label={fullMoving ? 'Preferred moving date' : 'Preferred date'}
+          optional={!fullMoving}
+          error={err('preferredDate')}
+        >
           <input {...describe('preferredDate', e)} type="date" min={today} suppressHydrationWarning className={`${inputClass} h-13`} />
         </Field>
 
@@ -163,8 +205,8 @@ export function BookingForm({ variant = 'full', defaultService }: { variant?: 'f
           </>
         )}
         {full && service === 'tasks' && (
-          <Field id="pickupAddress" label={copy.tasks.from} optional error={err('pickupAddress')}>
-            <input {...describe('pickupAddress', e)} className={`${inputClass} h-13`} />
+          <Field id="pickupAddress" label={copy.tasks.from} error={err('pickupAddress')} hint="Address, neighbourhood or store.">
+            <input {...describe('pickupAddress', e, true)} className={`${inputClass} h-13`} />
           </Field>
         )}
         {full && service === 'moving' && (
@@ -177,6 +219,36 @@ export function BookingForm({ variant = 'full', defaultService }: { variant?: 'f
             </select>
           </Field>
         )}
+        {fullMoving && (
+          <>
+            <Field id="packing" label="Packing requirements" error={err('packing')}>
+              <select {...describe('packing', e)} defaultValue="" className={`${inputClass} h-13`}>
+                <option value="">Select…</option>
+                {packingOptions.map((p) => (
+                  <option key={p}>{p}</option>
+                ))}
+              </select>
+            </Field>
+            <Field
+              id="accessDetails"
+              label="Stairs or elevator"
+              error={err('accessDetails')}
+              className="sm:col-span-2"
+              hint="At both addresses, e.g. 3rd-floor walk-up at pickup, elevator at destination (booking needed)."
+            >
+              <input {...describe('accessDetails', e, true)} className={`${inputClass} h-13`} />
+            </Field>
+            <Field
+              id="itemDetails"
+              label="Furniture inventory"
+              error={err('itemDetails')}
+              className="sm:col-span-2"
+              hint="List the main pieces, e.g. queen bed, 3-seat sofa, dining table and 6 chairs, about 20 boxes. Note any items that need assembly or disassembly."
+            >
+              <textarea {...describe('itemDetails', e, true)} rows={4} className={`${inputClass} resize-y py-3.5`} />
+            </Field>
+          </>
+        )}
         {full && service === 'delivery' && (
           <Field id="itemDetails" label="Item details" error={err('itemDetails')} className="sm:col-span-2" hint="What are we picking up? Size, weight and number of pieces help.">
             <textarea {...describe('itemDetails', e, true)} rows={3} className={`${inputClass} resize-y py-3.5`} />
@@ -188,16 +260,17 @@ export function BookingForm({ variant = 'full', defaultService }: { variant?: 'f
           label={t && full ? t.desc : 'Short description of your request'}
           error={err('description')}
           hint={t && full ? t.descHint : undefined}
+          optional={fullMoving}
           className="sm:col-span-2"
         >
-          <textarea {...describe('description', e, Boolean(t && full))} rows={full ? 5 : 3} className={`${inputClass} resize-y py-3.5`} />
+          <textarea {...describe('description', e, Boolean(t && full))} rows={fullMoving ? 3 : full ? 5 : 3} className={`${inputClass} resize-y py-3.5`} />
         </Field>
 
         {full && service === 'moving' && (
           <div className="rounded-2xl border border-dashed border-[#d9cec7] bg-cream/60 p-5 sm:col-span-2">
             <p className="text-[0.875rem] font-semibold">Moving checklist</p>
             <p className="mt-1 text-[0.875rem] text-muted">
-              Download our checklist, fill it in and attach it here. Please note we do not offer disassembly or assembly services.
+              Download our checklist, fill it in and attach it here. Furniture assembly and disassembly are included, so tell us which items need it.
             </p>
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <a href={business.movingChecklistUrl} download className={buttonClass('outline-dark', 'min-h-11 px-5 text-sm')}>
@@ -221,6 +294,31 @@ export function BookingForm({ variant = 'full', defaultService }: { variant?: 'f
               </span>
             </div>
             {err('attachment') && <p className="mt-2 text-[0.8125rem] font-medium text-red">{err('attachment')}</p>}
+
+            <p className="mt-6 border-t border-dashed border-[#d9cec7] pt-5 text-[0.875rem] font-semibold">
+              Photos <span className="font-normal text-muted">(optional)</span>
+            </p>
+            <p className="mt-1 text-[0.875rem] text-muted">Photos of large or awkward items and tight access help us quote accurately.</p>
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <label className={buttonClass('outline-dark', 'min-h-11 cursor-pointer px-5 text-sm has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-red')}>
+                <ImagePlus aria-hidden className="size-4" />
+                {photoCount ? 'Change photos' : 'Add photos'}
+                <input
+                  type="file"
+                  name="photos"
+                  multiple
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  className="sr-only"
+                  onChange={(ev) => setPhotoCount(ev.target.files?.length ?? 0)}
+                  aria-invalid={err('photos') ? true : undefined}
+                  aria-describedby="photos-status"
+                />
+              </label>
+              <span id="photos-status" className="text-sm text-muted" aria-live="polite">
+                {photoCount ? `${photoCount} photo${photoCount === 1 ? '' : 's'} selected` : `Up to ${MAX_PHOTOS} photos`}
+              </span>
+            </div>
+            {err('photos') && <p className="mt-2 text-[0.8125rem] font-medium text-red">{err('photos')}</p>}
           </div>
         )}
       </div>

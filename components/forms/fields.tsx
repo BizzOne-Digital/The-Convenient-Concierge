@@ -68,7 +68,9 @@ export function SpamGuards() {
         <label htmlFor="company">Company (leave blank)</label>
         <input id="company" name="company" type="text" tabIndex={-1} autoComplete="off" defaultValue="" />
       </div>
-      <input ref={startedAt} type="hidden" name="startedAt" defaultValue="" />
+      {/* No defaultValue: on a hidden input React re-applies it on every re-render, wiping the time
+          after a failed validation and making the corrected submission look like spam. */}
+      <input ref={startedAt} type="hidden" name="startedAt" />
     </>
   )
 }

@@ -9,7 +9,7 @@ import { getPublishedTestimonials, getSiteSettings } from '@/lib/data'
 import { pageMetadata } from '@/lib/seo'
 
 export const metadata = pageMetadata({
-  title: 'Testimonials',
+  title: 'Client Testimonials and Organisations We Serve',
   description: 'Client feedback and the organisations The Convenient Concierge has had the pleasure of working with across Toronto.',
   path: '/testimonials',
 })

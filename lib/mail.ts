@@ -5,7 +5,14 @@ const configured = () =>
   Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASSWORD && process.env.SMTP_FROM && process.env.BOOKING_NOTIFICATION_EMAIL)
 
 /** Optional notification. Never throws and never logs customer details. */
-export async function notifyNewInquiry(summary: { serviceLabel: string; name: string; email: string; phone: string; description: string }) {
+export async function notifyNewInquiry(summary: {
+  serviceLabel: string
+  name: string
+  email: string
+  phone: string
+  description: string
+  details?: [string, string][]
+}) {
   if (!configured()) return
   try {
     const port = Number(process.env.SMTP_PORT ?? 587)
@@ -25,6 +32,7 @@ export async function notifyNewInquiry(summary: { serviceLabel: string; name: st
         `Name: ${summary.name}`,
         `Email: ${summary.email}`,
         `Phone: ${summary.phone || 'n/a'}`,
+        ...(summary.details ?? []).filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`),
         '',
         summary.description,
         '',

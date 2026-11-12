@@ -7,8 +7,9 @@ import { getSiteSettings } from '@/lib/data'
 import { pageMetadata } from '@/lib/seo'
 
 export const metadata = pageMetadata({
-  title: 'Book a Service',
-  description: 'Request moving, pick-up & delivery, or tasks & errands. Tell us what you need and our team will contact you to confirm details and provide a quote.',
+  title: 'Request a Free Quote',
+  description:
+    'Request a free quote for moving, furniture pickup and delivery, or tasks and errands in Toronto. Tell us what you need and we will contact you to confirm the details.',
   path: '/booking',
 })
 
@@ -57,7 +58,7 @@ export default async function BookingPage({ searchParams }: { searchParams: Prom
               <Reveal delay={0.05} className="rounded-[22px] border border-line bg-paper p-6">
                 <p className="font-semibold">Planning a move?</p>
                 <p className="mt-2 text-sm text-muted">
-                  Download, fill in and attach our moving checklist. Please note we do not offer disassembly or assembly services.
+                  Download, fill in and attach our moving checklist. Furniture assembly and disassembly are included in our moving services.
                 </p>
                 <a href={business.movingChecklistUrl} download className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-red underline-offset-4 hover:underline">
                   <Download aria-hidden className="size-4" /> Moving Checklist (PDF)

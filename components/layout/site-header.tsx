@@ -58,7 +58,7 @@ export function SiteHeader({ phone }: { phone: string }) {
                 <MapPin aria-hidden className="size-3.5 shrink-0 text-red-warm" />
                 <span className="truncate">
                   <span className="sm:hidden">Serving Toronto &amp; Etobicoke</span>
-                  <span className="hidden sm:inline">Serving Downtown Toronto, Etobicoke &amp; nearby neighbourhoods</span>
+                  <span className="hidden sm:inline">Serving Toronto, Etobicoke &amp; East Mississauga</span>
                 </span>
               </p>
               <a href={tel(phone)} className="flex shrink-0 items-center gap-2 font-medium text-white transition-colors hover:text-red-warm">

@@ -8,11 +8,24 @@ import { getPublishedFaqs, getSiteSettings } from '@/lib/data'
 import { pageMetadata } from '@/lib/seo'
 
 export const metadata = pageMetadata({
-  title: 'Frequently Asked Questions',
+  title: 'FAQ: Moving, Delivery and Errands in Toronto',
   description:
-    'Answers about our moving, pick-up & delivery and tasks & errands services, service areas, quotes, and what we do and do not offer.',
+    'Answers about our Toronto moving services, furniture pickup and delivery, tasks and errands, the areas we serve, and how to request a quote.',
   path: '/faq',
 })
+
+/** Makes phone numbers and email addresses in (admin-editable, plain-text) answers clickable. */
+function linkContacts(text: string) {
+  return text.split(/(\b\d{3}[-. ]\d{3}[-. ]\d{4}\b|[\w.+-]+@[\w-]+\.[\w.]+\w)/).map((part, i) => {
+    if (i % 2 === 0) return part
+    const href = part.includes('@') ? `mailto:${part}` : `tel:+1${part.replace(/\D/g, '')}`
+    return (
+      <a key={i} href={href} className="font-semibold text-red underline-offset-4 hover:underline">
+        {part}
+      </a>
+    )
+  })
+}
 
 export default async function FaqPage() {
   const [settings, faqs] = await Promise.all([getSiteSettings(), getPublishedFaqs()])
@@ -86,7 +99,7 @@ export default async function FaqPage() {
                         <Plus aria-hidden className="size-4" />
                       </span>
                     </summary>
-                    <p className="max-w-2xl pb-7 pl-11 text-muted">{f.answer}</p>
+                    <p className="max-w-2xl pb-7 pl-11 text-muted">{linkContacts(f.answer)}</p>
                   </details>
                 ))}
               </div>

@@ -9,7 +9,7 @@ import { getPublishedPosts, getSiteSettings } from '@/lib/data'
 import { pageMetadata } from '@/lib/seo'
 
 export const metadata = pageMetadata({
-  title: 'Blog',
+  title: 'Blog: Moving, Delivery and Errand Tips',
   description: 'Moving tips, delivery know-how and ideas for winning back your time, from The Convenient Concierge in Toronto.',
   path: '/blog',
 })

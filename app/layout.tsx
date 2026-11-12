@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(business.siteUrl),
   title: { default: `${business.name} | Moving, Deliveries, Tasks & Errands in Toronto`, template: `%s | ${business.name}` },
   description:
-    'Your personal concierge in Toronto. Moving, pick-up & delivery, and tasks & errands for homes and businesses from Downtown Toronto to East Mississauga.',
+    'Your personal concierge in Toronto. Moving, pick-up & delivery, and tasks & errands for homes and businesses in Toronto, Etobicoke and East Mississauga.',
   applicationName: business.name,
   formatDetection: { telephone: false },
 }

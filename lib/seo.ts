@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { business, serviceAreas, services } from '@/lib/content'
+import { areaSummary, business, serviceAreas, services } from '@/lib/content'
 
 export const absoluteUrl = (path = '/') => new URL(path, business.siteUrl).toString()
 
@@ -33,7 +33,10 @@ export function pageMetadata({
   }
 }
 
-const areaServed = serviceAreas.map((name) => ({ '@type': 'Place', name: `${name}, ON` }))
+const areaServed = [
+  { '@type': 'City', name: 'Toronto, ON' },
+  ...serviceAreas.filter((n) => n !== 'Downtown Toronto').map((name) => ({ '@type': 'Place', name: `${name}, ON` })),
+]
 
 export function localBusinessJsonLd(phone: string, email: string) {
   return {
@@ -43,7 +46,7 @@ export function localBusinessJsonLd(phone: string, email: string) {
     name: business.name,
     slogan: business.promise,
     description:
-      'Moving, pick-up & delivery, and tasks & errands for residential and corporate clients across Toronto, Etobicoke and East Mississauga.',
+      `Moving, pick-up & delivery, and tasks & errands for residential and corporate clients in ${areaSummary}.`,
     url: absoluteUrl('/'),
     logo: absoluteUrl('/images/brand/logo-on-light.png'),
     image: absoluteUrl('/images/og-default.jpg'),

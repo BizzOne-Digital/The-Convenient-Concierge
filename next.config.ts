@@ -27,8 +27,40 @@ const securityHeaders = [
   ...(isProd ? [{ key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' }] : []),
 ]
 
+/**
+ * 301s from the previous WordPress site (taken from its wp-sitemap.xml, 2026-11-13).
+ * Only URLs with a real equivalent are mapped. Deliberately left to 404: LCBO/Beer Store and
+ * airport-service forms (not offered on the new site), account/login pages, and WordPress defaults.
+ */
+const quote = (service?: 'moving' | 'delivery' | 'tasks') => (service ? `/booking?service=${service}` : '/booking')
+const legacyRedirects: [string, string][] = [
+  ['/new-order-page', quote()],
+  ['/order-forms-casual-service', quote()],
+  ['/order-forms-standard-service', quote()],
+  ['/order-forms-es', quote()],
+  ['/new-order-page/moving-form', quote('moving')],
+  ['/new-order-page/deliveries-form', quote('delivery')],
+  ['/order-forms-casual-service/deliveries-cs', quote('delivery')],
+  ['/order-forms-standard-service/deliveries-ss', quote('delivery')],
+  ['/order-forms-es/deliveries-es', quote('delivery')],
+  ['/new-order-page/tasks-and-errands', quote('tasks')],
+  ['/new-order-page/grocery-form', quote('tasks')],
+  ['/new-order-page/any-shop-form', quote('tasks')],
+  ['/order-forms-casual-service/shop-any-store-cs', quote('tasks')],
+  ['/order-forms-casual-service/grocery-from-cs', quote('tasks')],
+  ['/order-forms-standard-service/shop-any-store-ss', quote('tasks')],
+  ['/order-forms-standard-service/grocery-form-ss', quote('tasks')],
+  ['/order-forms-es/any-store-es', quote('tasks')],
+  ['/order-forms-es/grocery-form-es', quote('tasks')],
+  ['/wp-content/uploads/2022/03/1.TCC-Moving-Checklist.pdf', '/documents/tcc-moving-checklist.pdf'],
+]
+
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  async redirects() {
+    // Old URLs end in "/": Next.js first 308s them to the slash-less path (also permanent), then this 301 applies.
+    return legacyRedirects.map(([source, destination]) => ({ source, destination, statusCode: 301 }))
+  },
   serverExternalPackages: ['@node-rs/argon2'],
   images: {
     formats: ['image/avif', 'image/webp'],

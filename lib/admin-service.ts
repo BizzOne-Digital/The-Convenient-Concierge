@@ -59,8 +59,8 @@ export async function deleteBooking(id: string): Promise<Result> {
   await connectDB()
   const doc = await BookingInquiry.findOneAndDelete({ _id }).lean()
   if (!doc) return { ok: false, error: 'Request not found.' }
-  const filename = doc.attachmentUrl?.split('/').pop()
-  if (isValidFilename(filename)) await StoredUpload.deleteOne({ folder: PRIVATE_FOLDER, filename })
+  const filenames = [doc.attachmentUrl, ...(doc.photoUrls ?? [])].map((u) => u?.split('/').pop()).filter(isValidFilename)
+  if (filenames.length) await StoredUpload.deleteMany({ folder: PRIVATE_FOLDER, filename: { $in: filenames } })
   return { ok: true }
 }
 

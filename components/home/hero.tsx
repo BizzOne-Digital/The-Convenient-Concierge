@@ -1,8 +1,9 @@
+import { Phone } from 'lucide-react'
 import { ButtonLink } from '@/components/ui/button'
 import { SafeImage } from '@/components/ui/safe-image'
 import { HeroList } from './hero-list'
 
-export function Hero({ image }: { image: string }) {
+export function Hero({ image, phone }: { image: string; phone: string }) {
   return (
     <section className="on-dark grain relative isolate overflow-hidden bg-ink text-white" aria-labelledby="hero-title">
       <div className="absolute inset-0 -z-10">
@@ -29,23 +30,23 @@ export function Hero({ image }: { image: string }) {
           <p className="rise text-eyebrow eyebrow-rule text-white/85" style={{ ['--d' as string]: 60 }}>
             Your personal concierge service
           </p>
-          <h1 id="hero-title" className="rise mt-7 text-display" style={{ ['--d' as string]: 140 }}>
-            Moving, Deliveries,
-            <br />
-            Tasks <span className="em-red">and</span> Errands
+          <h1 id="hero-title" className="rise mt-7 max-w-3xl text-h1" style={{ ['--d' as string]: 140 }}>
+            Toronto Moving Services, Furniture Delivery <span className="em-red">&amp;</span> Everyday Concierge Help
           </h1>
           <p className="rise mt-8 max-w-xl text-lead text-white/78" style={{ ['--d' as string]: 260 }}>
-            Life gets busy. Let us handle the details. From moving and deliveries to everyday tasks, we make your life easier.
+            Home, condo and office moves, furniture and appliance pickup and delivery, and everyday tasks and errands for
+            homes and businesses throughout Toronto and the GTA. Life gets busy. Let us handle the details.
           </p>
           <div className="rise mt-10 flex flex-wrap gap-3" style={{ ['--d' as string]: 380 }}>
-            <ButtonLink href="/booking">Book a Service</ButtonLink>
-            <ButtonLink href="/services" variant="outline-light">
-              Explore Services
+            <ButtonLink href="/booking">Request a Free Quote</ButtonLink>
+            <ButtonLink href={`tel:+1${phone.replace(/\D/g, '')}`} variant="outline-light" arrow={false}>
+              <Phone aria-hidden className="size-4" />
+              Call Now
             </ButtonLink>
           </div>
           <p className="rise mt-12 flex items-center gap-3 text-sm text-white/55" style={{ ['--d' as string]: 500 }}>
             <span className="h-px w-8 bg-white/30" />
-            Residential &amp; corporate clients, from Downtown Toronto to East Mississauga
+            Residential &amp; corporate clients in Toronto, Etobicoke &amp; East Mississauga
           </p>
         </div>
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { POST as submitBooking } from '@/app/api/bookings/route'
 import { POST as submitContact } from '@/app/api/contact/route'
-import { updateBookingStatus, updateContactSettings, saveBlogPost } from '@/lib/admin-service'
+import { deleteBooking, updateBookingStatus, updateContactSettings, saveBlogPost } from '@/lib/admin-service'
 import { getPublishedPosts, getPublishedTestimonials, getSiteSettings } from '@/lib/data'
 import { BookingInquiry, SiteSettings, StoredUpload, Testimonial } from '@/models'
 import { multipart, setupTestDb } from '../helpers/db'
@@ -9,8 +9,8 @@ import { multipart, setupTestDb } from '../helpers/db'
 setupTestDb()
 
 const human = () => String(Date.now() - 20_000)
-const valid = { name: 'Jane Doe', email: 'jane@example.com', phone: '647-555-0100', serviceType: 'tasks', description: 'Weekly grocery run from Loblaws, please.' }
-const post = (fields: Record<string, string | Blob>, ip = '10.0.0.1') =>
+const valid = { name: 'Jane Doe', email: 'jane@example.com', phone: '647-555-0100', serviceType: 'tasks', pickupAddress: 'Liberty Village', description: 'Weekly grocery run from Loblaws, please.' }
+const post = (fields: Record<string, string | Blob | Blob[]>, ip = '10.0.0.1') =>
   submitBooking(new Request('http://localhost/api/bookings', multipart({ startedAt: human(), company: '', ...fields }, { 'x-forwarded-for': ip })))
 
 describe('POST /api/bookings', () => {
@@ -29,7 +29,7 @@ describe('POST /api/bookings', () => {
     const json = await res.json()
     expect(res.status).toBe(422)
     expect(json.errors.email).toBeTruthy()
-    expect(json.errors.pickupAddress).toBeTruthy()
+    expect(json.errors.destinationAddress).toBeTruthy()
     expect(await BookingInquiry.countDocuments()).toBe(0)
   })
 
@@ -46,13 +46,41 @@ describe('POST /api/bookings', () => {
     expect(saved?.attachmentUrl).toBe('')
   })
 
-  it('stores moving checklist attachments privately', async () => {
+  const move = {
+    ...valid,
+    serviceType: 'moving',
+    form: 'full',
+    description: '',
+    preferredDate: new Date(Date.now() + 7 * 864e5).toISOString().slice(0, 10),
+    pickupAddress: '1 King St W',
+    destinationAddress: '2 Queen St W',
+    accessDetails: '2nd-floor walk-up at pickup, elevator at destination',
+    itemDetails: 'Queen bed, 3-seat sofa, 20 boxes',
+    packing: 'I would like help with packing',
+  }
+  const png = () => new File([new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0])], 'p.jpg', { type: 'image/jpeg' })
+
+  it('stores a full moving request with checklist and photos privately, then deletes them with the request', async () => {
     const pdf = new File([new TextEncoder().encode('%PDF-1.4 checklist')], 'list.pdf', { type: 'application/pdf' })
-    const res = await post({ ...valid, serviceType: 'moving', form: 'full', pickupAddress: '1 King St W', destinationAddress: '2 Queen St W', attachment: pdf })
+    const res = await post({ ...move, attachment: pdf, photos: [png(), png()] })
     expect(res.status).toBe(200)
     const saved = await BookingInquiry.findOne().lean()
+    expect(saved).toMatchObject({ accessDetails: move.accessDetails, packing: move.packing, itemDetails: move.itemDetails })
     expect(saved?.attachmentUrl).toMatch(/^\/api\/admin\/attachments\//)
-    expect(await StoredUpload.countDocuments({ folder: 'bookings' })).toBe(1)
+    expect(saved?.photoUrls).toHaveLength(2)
+    for (const u of saved!.photoUrls) expect(u).toMatch(/^\/api\/admin\/attachments\/\d{13}-[a-f0-9]{16}\.png$/)
+    expect(await StoredUpload.countDocuments({ folder: 'bookings' })).toBe(3)
+    expect((await deleteBooking(String(saved!._id))).ok).toBe(true)
+    expect(await StoredUpload.countDocuments({ folder: 'bookings' })).toBe(0)
+  })
+
+  it('rejects non-image photos, too many photos and photos on other services, storing nothing', async () => {
+    const fake = new File([new TextEncoder().encode('<svg onload=alert(1)>')], 'x.png', { type: 'image/png' })
+    expect((await post({ ...move, photos: [png(), fake] }, '10.0.0.2')).status).toBe(422)
+    expect((await post({ ...move, photos: Array.from({ length: 6 }, png) }, '10.0.0.2')).status).toBe(422)
+    expect((await post({ ...valid, form: 'full', pickupAddress: 'Liberty Village', photos: [png()] }, '10.0.0.2')).status).toBe(422)
+    expect(await StoredUpload.countDocuments()).toBe(0)
+    expect(await BookingInquiry.countDocuments()).toBe(0)
   })
 
   it('rate-limits repeated submissions from one address', async () => {

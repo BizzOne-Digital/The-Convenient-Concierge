@@ -3,9 +3,13 @@ import { CityRoutes } from '@/components/ui/city-routes'
 
 const TAGLINE = 'Life gets busy. Let us handle the details.'
 
+// Total length in ms. Must match the CSS timeline in globals.css: --splash-out (6s) + iris delay (0.15s) + iris (0.9s).
+const TOTAL_MS = 7100
+const SKIP_FADE_MS = 400
+
 // Runs before first paint: shows the splash once per session, never for reduced-motion users or without JS.
-// Click or Escape skips it; it removes itself after the sequence.
-const SCRIPT = `(function(){try{var d=document.documentElement;if(sessionStorage.getItem('tcc-splash')||matchMedia('(prefers-reduced-motion: reduce)').matches)return;sessionStorage.setItem('tcc-splash','1');d.dataset.splash='on';var off=function(){d.dataset.splash='done'};setTimeout(off,3500);addEventListener('keydown',function(e){if(e.key==='Escape')off()});document.addEventListener('click',function(e){if(e.target.closest&&e.target.closest('#tcc-splash'))off()})}catch(e){}})()`
+// Click, tap or Escape skips it with a short fade; it removes itself after the sequence.
+const SCRIPT = `(function(){try{var d=document.documentElement;if(sessionStorage.getItem('tcc-splash')||matchMedia('(prefers-reduced-motion: reduce)').matches)return;sessionStorage.setItem('tcc-splash','1');d.dataset.splash='on';var done=function(){d.dataset.splash='done';delete d.dataset.splashSkip};var skip=function(){if(d.dataset.splash!=='on'||d.dataset.splashSkip)return;d.dataset.splashSkip='';setTimeout(done,${SKIP_FADE_MS})};setTimeout(done,${TOTAL_MS});addEventListener('keydown',function(e){if(e.key==='Escape')skip()});document.addEventListener('click',function(e){if(e.target.closest&&e.target.closest('#tcc-splash'))skip()})}catch(e){}})()`
 
 const ticks = Array.from({ length: 12 }, (_, i) => i * 30)
 
@@ -59,6 +63,7 @@ export function Splash() {
 
         <div className="splash-meta">
           <span>Moving · Deliveries · Tasks &amp; Errands</span>
+          <span className="splash-skip">Tap or click to skip</span>
           <span className="splash-count" />
         </div>
         <div className="splash-progress">

@@ -3,7 +3,8 @@ import Image from 'next/image'
 import { CityRoutes } from '@/components/ui/city-routes'
 import { buttonClass } from '@/components/ui/button'
 
-export const metadata = { title: 'Page not found', robots: { index: false } }
+// Next.js adds noindex to 404 responses itself.
+export const metadata = { title: 'Page not found' }
 
 export default function NotFound() {
   return (

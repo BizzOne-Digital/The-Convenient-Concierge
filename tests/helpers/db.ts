@@ -26,8 +26,8 @@ export const PNG = Buffer.from('89504e470d0a1a0a0000000d494844520000000100000001
 export const JPEG = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01])
 export const SVG = Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>')
 
-export function multipart(fields: Record<string, string | Blob>, headers: Record<string, string> = {}) {
+export function multipart(fields: Record<string, string | Blob | Blob[]>, headers: Record<string, string> = {}): RequestInit & { headers: Record<string, string> } {
   const fd = new FormData()
-  for (const [k, v] of Object.entries(fields)) fd.append(k, v)
+  for (const [k, v] of Object.entries(fields)) for (const item of Array.isArray(v) ? v : [v]) fd.append(k, item)
   return { method: 'POST', body: fd, headers }
 }
