@@ -10,7 +10,8 @@ export const metadata = pageMetadata({
 })
 
 // Client-supplied wording (2026-11-13), proposed and subject to confirming data-handling practices before publication.
-// Headings are shown in sentence case; the text is otherwise verbatim.
+// Headings are shown in sentence case. Added 2026-11-14 to reflect the site's actual data handling: private uploads (s4),
+// provider types (s6), encryption and U.S. storage (s7), no analytics/tracking (s9).
 const EFFECTIVE_DATE = 'Proposed Effective Date: November 12, 2026'
 
 const policy = `
@@ -54,6 +55,8 @@ Customers may voluntarily submit photographs or videos of furniture, belongings 
 
 These materials are used for legitimate service-related purposes and are not published as promotional content without appropriate permission.
 
+Photographs and files uploaded through our website are stored privately. They are never displayed on the website and can only be accessed by authorized members of our team.
+
 ## 5. Consent
 
 We collect, use and disclose personal information with consent where required by applicable law.
@@ -66,6 +69,8 @@ We do not sell customer personal information.
 
 We may share necessary information with authorized employees, contractors, service partners, payment processors and technology providers to deliver our services.
 
+The technology providers that process information submitted through our website are our website hosting provider, our database provider and our email provider.
+
 We may also disclose information when required or permitted by law.
 
 We take reasonable steps to ensure service providers protect personal information appropriately.
@@ -74,7 +79,11 @@ We take reasonable steps to ensure service providers protect personal informatio
 
 We use reasonable administrative, technical and organizational safeguards appropriate to the sensitivity of the information.
 
+Information submitted through our website is encrypted in transit, and uploaded files are accessible only to authorized members of our team.
+
 However, no electronic transmission or storage system can be guaranteed completely secure.
+
+Customer information and photographs submitted through our website are stored by our service providers in the United States. While stored there, this information may be subject to the laws of the United States, including lawful access by courts, law enforcement and government authorities.
 
 ## 8. Information retention
 
@@ -84,7 +93,7 @@ When no longer required, information will be securely deleted, destroyed or anon
 
 ## 9. Website cookies and analytics
 
-Our website may use cookies or similar technologies to support functionality, security and performance.
+Our website does not currently use analytics, advertising or tracking cookies. We use only essential technologies required for website security and functionality.
 
 Where analytics or other tracking technologies are used, we will provide relevant information and consent choices as required by applicable law.
 

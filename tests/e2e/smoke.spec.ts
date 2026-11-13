@@ -57,6 +57,9 @@ test('privacy policy is linked from the footer and forms', async ({ page }) => {
   await page.getByRole('contentinfo').getByRole('link', { name: 'Privacy Policy' }).click()
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Privacy Policy')
   await expect(page.getByText('Privacy Contact: Marc Williams')).toBeVisible()
+  await expect(page.getByText(/stored by our service providers in the United States/)).toBeVisible()
+  await page.goto('/booking')
+  await expect(page.locator('form').getByRole('link', { name: 'Privacy Policy' })).toHaveAttribute('href', '/privacy-policy')
 })
 
 test('admin login page is reachable and not indexable', async ({ page }) => {
